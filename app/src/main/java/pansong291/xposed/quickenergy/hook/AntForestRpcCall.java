@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class AntForestRpcCall {
 
-    private static final String VERSION = "20230501";
+    private static final String VERSION = "20230710";
 
     public static String fillUserRobFlag(String userIdList) {
         return RpcUtil.request("alipay.antforest.forest.h5.fillUserRobFlag",
@@ -17,12 +17,14 @@ public class AntForestRpcCall {
 
     public static String queryEnergyRanking() {
         return RpcUtil.request("alipay.antmember.forest.h5.queryEnergyRanking",
-                "[{\"periodType\":\"day\",\"rankType\":\"energyRank\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION + "\"}]");
+                "[{\"periodType\":\"day\",\"rankType\":\"energyRank\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\""
+                        + VERSION + "\"}]");
     }
 
     public static String queryHomePage() {
         return RpcUtil.request("alipay.antforest.forest.h5.queryHomePage",
-                "[{\"configVersionMap\":{\"redPacketConfig\":0,\"wateringBubbleConfig\":\"10\"},\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION + "\"}]");
+                "[{\"configVersionMap\":{\"redPacketConfig\":0,\"wateringBubbleConfig\":\"10\"},\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\""
+                        + VERSION + "\"}]");
     }
 
     public static String queryFriendHomePage(String userId) {
@@ -92,6 +94,13 @@ public class AntForestRpcCall {
                         "\",\"source\":\"ANTFOREST\",\"taskType\":\"" + taskType + "\"}]");
     }
 
+    public static String finishTask(String sceneCode, String taskType) {
+        String outBizNo = taskType + "_" + RandomUtils.nextDouble();
+        return RpcUtil.request("com.alipay.antiep.finishTask",
+                "[{\"outBizNo\":\"" + outBizNo + "\",\"requestType\":\"H5\",\"sceneCode\":\"" +
+                        sceneCode + "\",\"source\":\"ANTFOREST\",\"taskType\":\"" + taskType + "\"}]");
+    }
+
     public static String popupTask() {
         return RpcUtil.request("alipay.antforest.forest.h5.popupTask",
                 "[{\"fromAct\":\"pop_task\",\"needInitSign\":false,\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"statusList\":[\"TODO\",\"FINISHED\"],\"version\":\"" +
@@ -105,9 +114,23 @@ public class AntForestRpcCall {
                         userId + "\"}]");
     }
 
-    public static String queryPropList() {
+    public static String queryPropList(boolean onlyGive) {
         return RpcUtil.request("alipay.antforest.forest.h5.queryPropList",
-                "[{\"onlyGive\":\"\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION + "\"}]");
+                "[{\"onlyGive\":\"" + (onlyGive ? "Y" : "")
+                        + "\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION
+                        + "\"}]");
+    }
+
+    public static String giveProp(String giveConfigId, String propId, String targetUserId) {
+        return RpcUtil.request("alipay.antforest.forest.h5.giveProp",
+                "[{\"giveConfigId\":\"" + giveConfigId + "\",\"propId\":\"" + propId
+                        + "\",\"source\":\"self_corner\",\"targetUserId\":\"" + targetUserId + "\"}]");
+    }
+
+    public static String collectProp(String giveConfigId, String giveId) {
+        return RpcUtil.request("alipay.antforest.forest.h5.collectProp",
+                "[{\"giveConfigId\":\"" + giveConfigId + "\",\"giveId\":\"" + giveId
+                        + "\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
     }
 
     public static String consumeProp(String propId, String propType) {
@@ -124,9 +147,8 @@ public class AntForestRpcCall {
                         spuId + "\",\"skuId\":\"" + skuId + "\",\"source\":\"GOOD_DETAIL\"}]");
     }
 
-
     public static String testH5Rpc(String operationTpye, String requestDate) {
-        return RpcUtil.request(operationTpye,requestDate);
+        return RpcUtil.request(operationTpye, requestDate);
     }
 
     /* 神奇物种 */
@@ -149,6 +171,74 @@ public class AntForestRpcCall {
     public static String antdodoCollect() {
         return RpcUtil.request("alipay.antdodo.rpc.h5.collect",
                 "[{}]");
+    }
+
+    /* 巡护保护地 */
+    public static String queryUserPatrol() {
+        return RpcUtil.request("alipay.antforest.forest.h5.queryUserPatrol",
+                "[{\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]");
+    }
+
+    public static String patrolGo(int nodeIndex, int patrolId) {
+        return RpcUtil.request("alipay.antforest.forest.h5.patrolGo",
+                "[{\"nodeIndex\":" + nodeIndex + ",\"patrolId\":" + patrolId
+                        + ",\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]");
+    }
+
+    public static String patrolKeepGoing(int nodeIndex, int patrolId, String eventType) {
+        String args = null;
+        switch (eventType) {
+            case "video":
+                args = "[{\"nodeIndex\":" + nodeIndex + ",\"patrolId\":" + patrolId
+                        + ",\"reactParam\":{\"viewed\":\"Y\"},\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]";
+                break;
+            case "chase":
+                args = "[{\"nodeIndex\":" + nodeIndex + ",\"patrolId\":" + patrolId
+                        + ",\"reactParam\":{\"sendChat\":\"Y\"},\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]";
+                break;
+            case "quiz":
+                args = "[{\"nodeIndex\":" + nodeIndex + ",\"patrolId\":" + patrolId
+                        + ",\"reactParam\":{\"answer\":\"correct\"},\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]";
+                break;
+            default:
+                args = "[{\"nodeIndex\":" + nodeIndex + ",\"patrolId\":" + patrolId
+                        + ",\"reactParam\":{},\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]";
+                break;
+        }
+        return RpcUtil.request("alipay.antforest.forest.h5.patrolKeepGoing", args);
+    }
+
+    public static String exchangePatrolChance(int costStep) {
+        return RpcUtil.request("alipay.antforest.forest.h5.exchangePatrolChance",
+                "[{\"costStep\":" + costStep + ",\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]");
+    }
+
+    public static String queryAnimalAndPiece(int animalId) {
+        String args = null;
+        if (animalId != 0) {
+            args = "[{\"animalId\":" + animalId + ",\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]";
+        } else {
+            args = "[{\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\",\"withDetail\":\"N\",\"withGift\":true}]";
+        }
+        return RpcUtil.request("alipay.antforest.forest.h5.queryAnimalAndPiece", args);
+    }
+
+    public static String combineAnimalPiece(int animalId, String piecePropIds) {
+        return RpcUtil.request("alipay.antforest.forest.h5.combineAnimalPiece",
+                "[{\"animalId\":" + animalId + ",\"piecePropIds\":" + piecePropIds
+                        + ",\"timezoneId\":\"Asia/Shanghai\",\"source\":\"ant_forest\"}]");
+    }
+
+    public static String AnimalConsumeProp(String propGroup, String propId, String propType) {
+        return RpcUtil.request("alipay.antforest.forest.h5.consumeProp",
+                "[{\"propGroup\":\"" + propGroup + "\",\"propId\":\"" + propId + "\",\"propType\":\"" + propType
+                        + "\",\"source\":\"ant_forest\",\"timezoneId\":\"Asia/Shanghai\"}]");
+    }
+
+    public static String collectAnimalRobEnergy(String propId, String propType, String shortDay) {
+        return RpcUtil.request("alipay.antforest.forest.h5.collectAnimalRobEnergy",
+                "[{\"propId\":\"" + propId + "\",\"propType\":\"" + propType + "\",\"shortDay\":\"" + shortDay
+                        + "\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
     }
 
 }
